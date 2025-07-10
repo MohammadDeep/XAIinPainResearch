@@ -30,3 +30,7 @@ biosignals_dir = "biosignals_raw"
 
 num_painmonit_subjects = 52
 num_biovid_subjects = 87
+
+# dataset have
+have_dataset_biovid = False
+have_dataset_painmonit = True

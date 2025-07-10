@@ -14,7 +14,7 @@ from scipy.stats import moment, zscore, mode, iqr
 
 from scripts.data_handling import resample_axis
 from scripts.preprocessing import preprocess_ecg, preprocess_gsr, preprocess_resp, preprocess_emg, butter_filter
-
+from config import have_dataset_biovid, have_dataset_painmonit
 
 '''
 This file implements several hand-crafted-feature approaches to analyze physiological sensors in the context of pain recognition.
@@ -1436,12 +1436,14 @@ if __name__ == "__main__":
 	"""
 	from config import painmonit_sensors, biovid_sensors, sampling_rate_painmonit, sampling_rate_biovid
 	from scripts.data_handling import read_biovid_np, read_painmonit_np
-	print("Create HCF for Biovid...")
-	X_biovid, y_biovid, subjects_biovid = read_biovid_np()
-	create_hcf(X_biovid, sensor_list= biovid_sensors, dataset= "biovid", sampling_rate= sampling_rate_biovid, overwrite= False)
-	print("HCF for Biovid created.")
-
-	print("Create HCF for UzL...")
-	X_uzl, y_uzl, subjects_uzl = read_painmonit_np(label= "heater")
-	create_hcf(X_uzl, sensor_list= painmonit_sensors, dataset= "painmonit", sampling_rate= sampling_rate_painmonit, overwrite= False)
-	print("HCF for UzL created.")
+	
+	if have_dataset_biovid:
+		print("Create HCF for Biovid...")
+		X_biovid, y_biovid, subjects_biovid = read_biovid_np()
+		create_hcf(X_biovid, sensor_list= biovid_sensors, dataset= "biovid", sampling_rate= sampling_rate_biovid, overwrite= False)
+		print("HCF for Biovid created.")
+	if have_dataset_painmonit:
+		print("Create HCF for UzL...")
+		X_uzl, y_uzl, subjects_uzl = read_painmonit_np(label= "heater")
+		create_hcf(X_uzl, sensor_list= painmonit_sensors, dataset= "painmonit", sampling_rate= sampling_rate_painmonit, overwrite= False)
+		print("HCF for UzL created.")

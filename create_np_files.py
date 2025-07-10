@@ -7,7 +7,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 from tensorflow.python.keras.utils.np_utils import to_categorical
 
-from config import window_secs, painmonit_sensors, baseline_temp, sampling_rate_painmonit, num_repetitions_uzl, biosignals_dir
+from config import window_secs, painmonit_sensors, baseline_temp, sampling_rate_painmonit, num_repetitions_uzl, biosignals_dir , have_dataset_painmonit , have_dataset_biovid
 
 #-------------------------------------------------------------------------------------------------------
 # Functions PainMonit (UzL) dataset
@@ -281,5 +281,8 @@ def np_biovid_exists(np_dir):
 if __name__ == "__main__":
 	"""Main function.
 	"""
-	create_np_painmonit()
-	create_np_biovid()
+
+	if have_dataset_painmonit:
+		create_np_painmonit()
+	if have_dataset_biovid :
+		create_np_biovid()
