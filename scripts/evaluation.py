@@ -315,11 +315,20 @@ def loso_cross_validation(X, aug, hcf, y, subjects, clf, output_csv = Path("resu
 		# ====================================================================
 		
 		# نام مدل (مانند 'cnn' یا 'rf') و شناسه سوژه را می‌گیریم
+		# calssefier
 		model_name = clf.name
-		
+		classes_list = clf.param.get("classes", [])
+		flat_list = [str(item) for sublist in classes_list for item in sublist]
+		classes_str = "classes_".join(flat_list)
+        # sensores
+		sensors_list = clf.param.get("selected_sensors", [])
+		sensors_str = "sensors_".join(sensors_list)
+		n_tree_list = clf.param.get("n_estimators", [])
+		n_tree = [str(s)for s in n_tree_list]
+		n_tree_str = "n_tree_".join(n_tree)
 		# ایجاد مسیر برای ذخیره فایل
 		# ابتدا مطمئن می‌شویم پوشه saved_models وجود دارد
-		save_dir = Path("saved_models")
+		save_dir = Path("saved_models", classes_str,sensors_str,n_tree_str )
 		os.makedirs(save_dir, exist_ok=True)
 
 		# تشخیص نوع مدل و ذخیره‌سازی بر اساس آن
