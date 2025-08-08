@@ -270,7 +270,7 @@ def rfe_loso(X, aug, hcf, y, subjects, clf, rfes= None, step= 1, output_csv = Pa
 		# save columns to delete
 		to_drop.extend(least_important)
 
-def loso_cross_validation(X, aug, hcf, y, subjects, clf, output_csv = Path("results", "loso.csv"), save_model_summary= False):
+def loso_cross_validation(X, aug, hcf, y, subjects, clf, output_csv = Path("results", "loso.csv"), save_model_summary= False, runs = 0):
 	"""Function to validate a keras model using leave one subject out validation.
 
 	Args:
@@ -334,7 +334,7 @@ def loso_cross_validation(X, aug, hcf, y, subjects, clf, output_csv = Path("resu
 		# تشخیص نوع مدل و ذخیره‌سازی بر اساس آن
 		if isinstance(clf.model, Model):
 			# اگر مدل از نوع TensorFlow/Keras باشد
-			save_path = save_dir / f"{model_name}_subject_{subject}.h5"
+			save_path = save_dir / f"{model_name}_{runs}_subject_{subject}.h5"
 			clf.model.save(save_path)
 			# print(f"Keras model for subject {subject} saved to: {save_path}") # (اختیاری)
 		elif hasattr(clf.model, 'predict_proba'): # یک راه برای تشخیص مدل‌های Scikit-learn
@@ -451,7 +451,7 @@ def five_loso(X, aug, hcf, y, subjects, clf, runs= 5, output_csv = Path("results
 	all_actuals = []
 
 	for i in tqdm(np.arange(runs)):
-		fscores, accs, predictions, actuals = loso_cross_validation(X, aug, hcf, y, subjects, clf)
+		fscores, accs, predictions, actuals = loso_cross_validation(X, aug, hcf, y, subjects, clf, runs = i)
 
 		acc_mean.append(np.nanmean(accs))
 		acc_std.append(np.std(accs))
