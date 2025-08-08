@@ -7,6 +7,11 @@ from pathlib import Path
 import keras.backend as K
 from datetime import datetime
 
+# کدهای اضافه شده
+import joblib
+from tensorflow.keras.models import Model
+# پایان کدهای اضافه شده
+
 from scripts.classifier import rf
 
 #-------------------------------------------------------------------------------------------------------
@@ -304,6 +309,34 @@ def loso_cross_validation(X, aug, hcf, y, subjects, clf, output_csv = Path("resu
 		clf.data_processing()
 		clf.create_model()
 		clf.train()
+
+		# ====================================================================
+		# شروع کد اضافه شده برای ذخیره مدل
+		# ====================================================================
+		
+		# نام مدل (مانند 'cnn' یا 'rf') و شناسه سوژه را می‌گیریم
+		model_name = clf.name
+		
+		# ایجاد مسیر برای ذخیره فایل
+		# ابتدا مطمئن می‌شویم پوشه saved_models وجود دارد
+		save_dir = Path("saved_models")
+		os.makedirs(save_dir, exist_ok=True)
+
+		# تشخیص نوع مدل و ذخیره‌سازی بر اساس آن
+		if isinstance(clf.model, Model):
+			# اگر مدل از نوع TensorFlow/Keras باشد
+			save_path = save_dir / f"{model_name}_subject_{subject}.h5"
+			clf.model.save(save_path)
+			# print(f"Keras model for subject {subject} saved to: {save_path}") # (اختیاری)
+		elif hasattr(clf.model, 'predict_proba'): # یک راه برای تشخیص مدل‌های Scikit-learn
+			# اگر مدل از نوع Scikit-learn باشد (مانند RandomForest)
+			save_path = save_dir / f"{model_name}_subject_{subject}.joblib"
+			joblib.dump(clf.model, save_path)
+			# print(f"Scikit-learn model for subject {subject} saved to: {save_path}") # (اختیاری)
+			
+		# ====================================================================
+		# پایان کد اضافه شده
+		# ====================================================================
 
 		# Save prediction and actual values
 		fold_predictions = list(from_categorical(clf.predict_test()))
