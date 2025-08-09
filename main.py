@@ -237,7 +237,7 @@ if __name__ == "__main__":
 		param["sensor_names"] = biovid_sensors
 		param["input_fs"] = 512
 	elif param["dataset"] == "painmonit":
-		param["painmonit_label"]= "heater" #or "covas"
+		param["painmonit_label"]="covas" # "heater" or "covas"
 		X, y, subjects = read_painmonit_np(label= param["painmonit_label"])
 		param["sensor_names"] = painmonit_sensors
 		param["input_fs"] = 250
@@ -261,11 +261,13 @@ if __name__ == "__main__":
 
 	# HCF
 	for selected_sensors  in [["Eda_RB"]]:
-		for n_estimators in [50, 100, 150, 200, 250]:
-			param["n_estimators"] = n_estimators
-			param["selected_sensors"] = selected_sensors
-			conduct_experiment(X.copy(), y.copy(), subjects.copy(), clf= rf(param), name= "rf", five_times= True)
-
+		for classes in [[[0], [1]], [[0], [2]],[[0], [3]],[[0], [4]]]:
+			for n_estimators in [50, 200]:
+				param["classes"] = classes
+				param["n_estimators"] = n_estimators
+				param["selected_sensors"] = selected_sensors
+				conduct_experiment(X.copy(), y.copy(), subjects.copy(), clf= rf(param), name= "rf", five_times= True)
+	'''
 	# Deep learning
 	param.update({"epochs": 100, "bs": 32, "lr": 0.0001, "smooth": 256, "resample": 256, "dense_out": 100, "minmax_norm": True})
 
@@ -274,3 +276,4 @@ if __name__ == "__main__":
 			conduct_experiment(X.copy(), y.copy(), subjects.copy(), clf= clf(param.copy()), name= param["dataset"], five_times= False, rfe= True)
 		except Exception as e:
 			print(e)
+			'''
