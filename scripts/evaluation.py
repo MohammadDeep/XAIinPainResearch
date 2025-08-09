@@ -344,7 +344,7 @@ def loso_cross_validation(X, aug, hcf, y, subjects, clf, output_csv = Path("resu
 		# تشخیص نوع مدل و ذخیره‌سازی بر اساس آن
 		if model_name == "rf":
 			# این شرط به طور خاص مدل جنگل تصادفی را مدیریت می‌کند
-			save_path = save_dir / f"{model_name}_subject_{subject}.joblib"
+			save_path = save_dir / f"{model_name}_{runs}_subject_{subject}.joblib"
 			print(f"--- SAVING RF MODEL to: {save_path} ---") # پیغام برای اطمینان از اجرا
 			joblib.dump(clf.model, save_path)
 
