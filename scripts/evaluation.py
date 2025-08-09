@@ -340,11 +340,13 @@ def loso_cross_validation(X, aug, hcf, y, subjects, clf, output_csv = Path("resu
 		# تشخیص نوع مدل و ذخیره‌سازی بر اساس آن
 		if isinstance(clf.model, Model):
 			# اگر مدل از نوع TensorFlow/Keras باشد
+			print('save model 1')
 			save_path = save_dir / f"{model_name}_{runs}_subject_{subject}.h5"
 			clf.model.save(save_path)
 			# print(f"Keras model for subject {subject} saved to: {save_path}") # (اختیاری)
 		elif hasattr(clf.model, 'predict_proba'): # یک راه برای تشخیص مدل‌های Scikit-learn
 			# اگر مدل از نوع Scikit-learn باشد (مانند RandomForest)
+			print('save model 2')
 			save_path = save_dir / f"{model_name}_subject_{subject}.joblib"
 			joblib.dump(clf.model, save_path)
 			# print(f"Scikit-learn model for subject {subject} saved to: {save_path}") # (اختیاری)
