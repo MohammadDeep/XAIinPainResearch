@@ -323,9 +323,15 @@ def loso_cross_validation(X, aug, hcf, y, subjects, clf, output_csv = Path("resu
         # sensores
 		sensors_list = clf.param.get("selected_sensors", [])
 		sensors_str = "sensors_".join(sensors_list)
-		n_tree_list = clf.param.get("n_estimators", [])
-		n_tree = [str(s)for s in n_tree_list]
-		n_tree_str = "n_tree_".join(n_tree)
+		# n Tree
+		n_estimators = clf.param.get("n_estimators") # دریافت عدد
+
+		# اگر پارامتر وجود داشت، رشته را بساز، در غیر این صورت یک مقدار پیش‌فرض بگذار
+		if n_estimators is not None:
+			n_tree_str = f"n_tree_{n_estimators}" # مثلا: "n_tree_100"
+		else:
+			n_tree_str = "DL_model" # یا هر نام دیگری برای مدل‌های یادگیری عمیق که این پارامتر را ندارند
+
 		# ایجاد مسیر برای ذخیره فایل
 		# ابتدا مطمئن می‌شویم پوشه saved_models وجود دارد
 		save_dir = Path("saved_models", classes_str,sensors_str,n_tree_str )
