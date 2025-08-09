@@ -336,7 +336,28 @@ def loso_cross_validation(X, aug, hcf, y, subjects, clf, output_csv = Path("resu
 		# ابتدا مطمئن می‌شویم پوشه saved_models وجود دارد
 		save_dir = Path("saved_models", classes_str,sensors_str,n_tree_str )
 		os.makedirs(save_dir, exist_ok=True)
+		# ... (کدهای قبلی برای ساختن save_dir اینجا قرار دارند) ...
 
+	
+		# ----- بلوک کد زیر را جایگزین کنید -----
+
+		# تشخیص نوع مدل و ذخیره‌سازی بر اساس آن
+		if model_name == "rf":
+			# این شرط به طور خاص مدل جنگل تصادفی را مدیریت می‌کند
+			save_path = save_dir / f"{model_name}_subject_{subject}.joblib"
+			print(f"--- SAVING RF MODEL to: {save_path} ---") # پیغام برای اطمینان از اجرا
+			joblib.dump(clf.model, save_path)
+
+		elif isinstance(clf.model, Model):
+			# این شرط مدل‌های TensorFlow/Keras را مدیریت می‌کند
+			save_path = save_dir / f"{model_name}_{runs}_subject_{subject}.h5"
+			print(f"--- SAVING KERAS MODEL to: {save_path} ---") # پیغام برای اطمینان از اجرا
+			clf.model.save(save_path)
+
+		else:
+			print(f"--- WARNING: Model type '{model_name}' not recognized for saving! ---")
+
+		# -----------------------------------------
 		# تشخیص نوع مدل و ذخیره‌سازی بر اساس آن
 		if isinstance(clf.model, Model):
 			# اگر مدل از نوع TensorFlow/Keras باشد
