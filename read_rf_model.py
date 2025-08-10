@@ -277,8 +277,8 @@ if __name__ == "__main__":
                     [X, aug, hcf, y, subjects], subjects, subject)
 	
     model_path = '/home/asr/mohammadBalaghi/x_projiect/XAIinPainResearch/saved_models/0classes_1/Eda_RB/n_tree_50/rf_0_subject_0.joblib'
-
-
+    print('-' * 50)
+    print('load model....')
     model = joblib.load(model_path)
 
-    predictions = model.predict(x_test)
+    predictions = model.predict(hcf_test)
