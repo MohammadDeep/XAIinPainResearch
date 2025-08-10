@@ -335,11 +335,13 @@ if __name__ == "__main__":
 				
 
     data = {
+		'subject':list_subject,
+		'calsses':list_calsses_1,
 		'dir':list_dir_modeles,
         'perdictions':list_predictions,
         'labels':list_labels,
-        'subject':list_subject,
-        'calsses':list_calsses_1,
+        
+       
     }
     df = pd.DataFrame(data)
     df.to_csv('./saved_models/output_data.csv', index=False, encoding='utf-8-sig')
