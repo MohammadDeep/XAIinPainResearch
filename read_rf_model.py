@@ -322,7 +322,7 @@ if __name__ == "__main__":
         for class_model in tqdm(list_calsses):
             list_dir_model = find_dir_model(class_model, f'sudject_{subject}')
             for dir_mdel in tqdm(list_dir_model):
-                model = joblib.load(model_path)
+                model = joblib.load(dir_mdel)
                 predictions = model.predict(hcf_test)
 				
                 list_dir_modeles.append(model_path)
