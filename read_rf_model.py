@@ -294,11 +294,12 @@ if __name__ == "__main__":
         if target_directory.is_dir():
             # با یک لیست کامپرشن، تمام آیتم‌ها را پیمایش کرده و فقط پوشه‌ها را انتخاب می‌کنیم
             subfolders = [entry for entry in target_directory.iterdir() if entry.is_dir()]
-
-            print(f"پوشه‌های موجود در '{target_directory}':")
+            print('-'* 5)
+            print(f"folder in :'{target_directory}':")
             # نام هر پوشه را چاپ می‌کنیم
             for folder in subfolders:
                 list_calsses.append(folder)
+                print(folder)
         return list_calsses
 
     list_calsses = list_folder_calsse(Path('./saved_models'))
