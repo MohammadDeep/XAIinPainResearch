@@ -304,10 +304,7 @@ if __name__ == "__main__":
 
     list_calsses = list_folder_calsse(Path('./saved_models'))
 	
-    model_path =Path( '/home/asr/mohammadBalaghi/x_projiect/XAIinPainResearch/saved_models')
-    print('-' * 50)
-    print('load model....')
-    model = joblib.load(model_path)
+ 
 	
     list_dir_modeles = []
     list_predictions =[]
