@@ -270,20 +270,74 @@ if __name__ == "__main__":
     print("subjects.shape")
     print(subjects.shape)
     print("\n")
+	
+
+    def find_dir_model(
+        main_folder_path,
+        specific_text,
+        file_format = '*.jodlib'
+        ):
+
+
+        matching_files = []
+
+        for file_path in main_folder_path.rglob(file_format):
+        
+            if specific_text in str(file_path) :
+                matching_files.append(file_path)
+
+        return matching_files
+	
+    def list_folder_calsse(target_directory):
+        list_calsses =[]
+        # ابتدا بررسی می‌کنیم که آدرس معتبر و یک پوشه باشد
+        if target_directory.is_dir():
+            # با یک لیست کامپرشن، تمام آیتم‌ها را پیمایش کرده و فقط پوشه‌ها را انتخاب می‌کنیم
+            subfolders = [entry for entry in target_directory.iterdir() if entry.is_dir()]
+
+            print(f"پوشه‌های موجود در '{target_directory}':")
+            # نام هر پوشه را چاپ می‌کنیم
+            for folder in subfolders:
+                list_calsses.append(folder)
+        return list_calsses
+
+    list_calsses = list_folder_calsse(Path('./saved_modeles'))
+	
+    model_path =Path( '/home/asr/mohammadBalaghi/x_projiect/XAIinPainResearch/saved_models')
+    print('-' * 50)
+    print('load model....')
+    model = joblib.load(model_path)
+	
+    list_dir_modeles = []
+    list_predictions =[]
+    list_labels = []
+    list_subject = []
+    list_calsses = []
 
     X, aug, hcf, y, subjects = prepare_data(X, y, subjects, param)
     for subject in (pbar := tqdm(np.unique(subjects))):
         x_train, aug_train, hcf_train, y_train, sub_train, x_test, aug_test, hcf_test, y_test, sub_test= leave_one_subject_out(
                     [X, aug, hcf, y, subjects], subjects, subject)
 	
-    model_path = '/home/asr/mohammadBalaghi/x_projiect/XAIinPainResearch/saved_models/0classes_1/Eda_RB/n_tree_50/rf_0_subject_0.joblib'
-    print('-' * 50)
-    print('load model....')
-    model = joblib.load(model_path)
+        for class_model in tqdm(list_calsses):
+            list_dir_model = find_dir_model(class_model, f'sudject_{subject}')
+            for dir_mdel in tqdm(list_dir_model):
+                predictions = model.predict(dir_mdel)
+				
+                list_dir_modeles.append(model_path)
+                list_predictions.append(predictions)
+                list_labels.append(y_test)
+                list_subject.append(subject)
+                list_calsses.append(class_model.name)
+				
 
-    predictions = model.predict(hcf_test)
-    for i in range(len(y_test)):
-        print(f'model dir :{model_path}')
-        print(f'sudject : {subject}')
-        print (f'predictions : {predictions[i]}')
-        print(f'label : {y_test[i]}')
+    data = {
+		'dir':list_dir_modeles,
+        'perdictions':list_predictions,
+        'labels':list_labels,
+        'subject':list_subject,
+        'calsses':list_calsses,
+    }
+    df = pd.DataFrame(data)
+    df.to_csv('./saved_modeles/output_data.csv', index=False, encoding='utf-8-sig')
+	
