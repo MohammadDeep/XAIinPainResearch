@@ -284,5 +284,6 @@ if __name__ == "__main__":
     predictions = model.predict(hcf_test)
     for i in range(len(y_test)):
         print(f'model dir :{model_path}')
+        print(f'sudject : {subject}')
         print (f'predictions : {predictions[i]}')
         print(f'label : {y_test[i]}')
