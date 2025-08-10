@@ -310,7 +310,7 @@ if __name__ == "__main__":
     list_predictions =[]
     list_labels = []
     list_subject = []
-    list_calsses = []
+    list_calsses_1 = []
 
     X, aug, hcf, y, subjects = prepare_data(X, y, subjects, param)
     for subject in (pbar := tqdm(np.unique(subjects))):
@@ -318,7 +318,7 @@ if __name__ == "__main__":
                     [X, aug, hcf, y, subjects], subjects, subject)
 	
         for class_model in list_calsses:
-            x = input('pres any:')
+            
             list_dir_model = find_dir_model(class_model, f'sudject_{subject}')
             print(f'list model in :')
             for dir_model in list_dir_model:
@@ -330,7 +330,7 @@ if __name__ == "__main__":
                 list_predictions.append(predictions)
                 list_labels.append(y_test)
                 list_subject.append(subject)
-                list_calsses.append(class_model.name)
+                list_calsses_1.append(class_model.name)
 				
 
     data = {
@@ -338,7 +338,7 @@ if __name__ == "__main__":
         'perdictions':list_predictions,
         'labels':list_labels,
         'subject':list_subject,
-        'calsses':list_calsses,
+        'calsses':list_calsses_1,
     }
     df = pd.DataFrame(data)
     df.to_csv('./saved_models/output_data.csv', index=False, encoding='utf-8-sig')
