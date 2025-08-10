@@ -282,3 +282,6 @@ if __name__ == "__main__":
     model = joblib.load(model_path)
 
     predictions = model.predict(hcf_test)
+	
+    print (f'predictions : {predictions}')
+    print(f'label : {y_test}')
