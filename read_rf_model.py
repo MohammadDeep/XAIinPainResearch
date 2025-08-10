@@ -340,5 +340,5 @@ if __name__ == "__main__":
         'calsses':list_calsses,
     }
     df = pd.DataFrame(data)
-    df.to_csv('./saved_modeles/output_data.csv', index=False, encoding='utf-8-sig')
+    df.to_csv('./saved_models/output_data.csv', index=False, encoding='utf-8-sig')
 	
