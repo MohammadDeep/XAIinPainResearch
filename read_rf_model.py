@@ -317,14 +317,14 @@ if __name__ == "__main__":
         x_train, aug_train, hcf_train, y_train, sub_train, x_test, aug_test, hcf_test, y_test, sub_test= leave_one_subject_out(
                     [X, aug, hcf, y, subjects], subjects, subject)
 	
-        for class_model in tqdm(list_calsses):
+        for class_model in list_calsses:
             list_dir_model = find_dir_model(class_model, f'sudject_{subject}')
-            for dir_model in tqdm(list_dir_model):
+            for dir_model in list_dir_model:
                 print(f'dir model : {dir_model}')
                 model = joblib.load(dir_model)
                 predictions = model.predict(hcf_test)
 				
-                list_dir_modeles.append(model_path)
+                list_dir_modeles.append(dir_model)
                 list_predictions.append(predictions)
                 list_labels.append(y_test)
                 list_subject.append(subject)
