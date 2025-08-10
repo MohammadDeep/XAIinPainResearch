@@ -320,7 +320,8 @@ if __name__ == "__main__":
         for class_model in list_calsses:
             
             list_dir_model = find_dir_model(class_model, f'sudject_{subject}')
-            print(f'list model in :')
+            print(f'list model in :{list_dir_model}')
+			
             for dir_model in list_dir_model:
                 print(f'dir model : {dir_model}')
                 model = joblib.load(dir_model)
