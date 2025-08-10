@@ -318,7 +318,9 @@ if __name__ == "__main__":
                     [X, aug, hcf, y, subjects], subjects, subject)
 	
         for class_model in list_calsses:
+            x = input('pres any:')
             list_dir_model = find_dir_model(class_model, f'sudject_{subject}')
+            print(f'list model in :')
             for dir_model in list_dir_model:
                 print(f'dir model : {dir_model}')
                 model = joblib.load(dir_model)
