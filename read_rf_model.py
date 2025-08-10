@@ -210,7 +210,7 @@ def check_gpu():
 if __name__ == "__main__":
 	
     import joblib
-    import tqdm
+    from tqdm import tqdm
 
 
 
