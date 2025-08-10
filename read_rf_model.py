@@ -301,7 +301,7 @@ if __name__ == "__main__":
                 list_calsses.append(folder)
         return list_calsses
 
-    list_calsses = list_folder_calsse(Path('./saved_modeles'))
+    list_calsses = list_folder_calsse(Path('./saved_models'))
 	
     model_path =Path( '/home/asr/mohammadBalaghi/x_projiect/XAIinPainResearch/saved_models')
     print('-' * 50)
@@ -322,7 +322,8 @@ if __name__ == "__main__":
         for class_model in tqdm(list_calsses):
             list_dir_model = find_dir_model(class_model, f'sudject_{subject}')
             for dir_mdel in tqdm(list_dir_model):
-                predictions = model.predict(dir_mdel)
+                model = joblib.load(model_path)
+                predictions = model.predict(hcf_test)
 				
                 list_dir_modeles.append(model_path)
                 list_predictions.append(predictions)
