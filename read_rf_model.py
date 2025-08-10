@@ -282,6 +282,7 @@ if __name__ == "__main__":
     model = joblib.load(model_path)
 
     predictions = model.predict(hcf_test)
-	
-    print (f'predictions : {predictions}')
-    print(f'label : {y_test}')
+    for i in range(len(y_test)):
+        print(f'model dir :{model_path}')
+        print (f'predictions : {predictions[i]}')
+        print(f'label : {y_test[i]}')
