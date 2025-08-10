@@ -319,8 +319,8 @@ if __name__ == "__main__":
 	
         for class_model in list_calsses:
             
-            list_dir_model = find_dir_model(class_model, f'sudject_{subject}')
-            print(f'list model in :{list_dir_model}, file : sudject_{subject}')
+            list_dir_model = find_dir_model(class_model, f'subject_{subject}')
+            print(f'list model in :{list_dir_model}, file : subject_{subject}')
 			
             for dir_model in list_dir_model:
                 print(f'dir model : {dir_model}')
