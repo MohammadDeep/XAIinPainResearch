@@ -275,7 +275,7 @@ if __name__ == "__main__":
     def find_dir_model(
         main_folder_path,
         specific_text,
-        file_format = '*.jodlib'
+        file_format = '*.joblib'
         ):
 
 
