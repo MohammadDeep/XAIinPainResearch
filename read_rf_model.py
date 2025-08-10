@@ -31,7 +31,7 @@ from scripts.augmentation import augment
 from hcf import get_hcf, moving_average
 from scripts.classifier import *
 from scripts.preprocessing import remove_ecg_wandering, preprocess_np
-from scripts.evaluation import loso_cross_validation, five_loso, accuracy, from_categorical, rfe_loso
+from scripts.evaluation import leave_one_subject_out,loso_cross_validation, five_loso, accuracy, from_categorical, rfe_loso
 from scripts.data_handling import read_biovid_np, pick_classes, normalize, resample_axis, read_painmonit_np, normalize_features
 
 from config import painmonit_sensors, biovid_sensors, sampling_rate_biovid, sampling_rate_painmonit
@@ -276,7 +276,7 @@ if __name__ == "__main__":
         x_train, aug_train, hcf_train, y_train, sub_train, x_test, aug_test, hcf_test, y_test, sub_test= leave_one_subject_out(
                     [X, aug, hcf, y, subjects], subjects, subject)
 	
-    model_path = 'model.pkl'
+    model_path = '/home/asr/mohammadBalaghi/x_projiect/XAIinPainResearch/saved_models/0classes_1/Eda_RB/n_tree_50/rf_0_subject_0.joblib'
 
 
     model = joblib.load(model_path)
