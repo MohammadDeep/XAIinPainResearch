@@ -23,6 +23,18 @@ This is the source code of the paper '**Explainable Artificial Intelligence (XAI
 - Run "hcf.py" to create hand-crafted features (HCF).
 - Run "main.py" or other scripts to evaluate the implemented methods.
 
+### SMOTE-enabled balancing (optional)
+
+The baseline classifier now exposes an optional SMOTE pre-processing stage to
+rebalance the training folds. Enable it by adding a ``"smote"`` entry to the
+parameter dictionary passed to a classifier (either ``True`` for default
+settings or a dictionary with any ``imblearn.over_sampling.SMOTE`` keyword
+arguments). During dataset setup the training windows are flattened so SMOTE can
+generate synthetic samples, the algorithm resamples the minority classes, and
+the synthetic windows are reshaped back to the original sensor layout while
+their labels and subject identifiers are kept in sync. This keeps evaluation
+metrics comparable while mitigating class imbalance in the training data.
+
 ## Please cite our paper if you use our code.
 ```bibtex
 @article{gouverneur2023explainable,
