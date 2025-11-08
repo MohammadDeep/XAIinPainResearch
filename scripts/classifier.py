@@ -12,9 +12,11 @@ import tensorflow as tf
 from keras import layers
 import tensorflow.keras.backend as K
 from tensorflow.keras.models import Model
+from tensorflow.keras.utils import to_categorical
 from sklearn.feature_selection import RFE
 from tensorflow.keras.optimizers import Adam
 from sklearn.ensemble import RandomForestRegressor
+from imblearn.over_sampling import SMOTE
 
 from .data_handling import unison_shuffled
 from .augmentation import window_slice, window_warp
@@ -106,6 +108,8 @@ class classifier(object):
 		self.num_sensors = self.x_train.shape[2]
 
 	def data_processing(self):
+		if self.param.get("smote"):
+			self._apply_smote()
 		# If there is augmentation data unequal to raw data and param is said, we extend 'train' with 'aug train'
 		if self.aug_train is not None and not np.array_equal(self.x_train, self.aug_train) and "aug" in self.param and len(self.param["aug"]) > 0:
 			self.x_train = np.concatenate([self.x_train, self.aug_train], axis= 0)
@@ -116,7 +120,46 @@ class classifier(object):
 			if "use_aug_test" in self.param and self.param["use_aug_test"]:
 				self.x_test = np.concatenate([self.x_test, self.aug_test], axis= 0)
 				self.y_test = np.concatenate([self.y_test] + [self.y_test] * len(self.param["aug"]), axis=0)
-				self.sub_test = np.concatenate([self.sub_test] + ([self.sub_test] * len(self.param["aug"])), axis=0)			
+				self.sub_test = np.concatenate([self.sub_test] + ([self.sub_test] * len(self.param["aug"])), axis=0)
+
+	def _apply_smote(self):
+		"""Rebalance the training fold with SMOTE while keeping metadata aligned.
+
+		The helper flattens the spatio-temporal tensor so that ``SMOTE`` can generate synthetic feature vectors, runs the oversampler with the optional keyword arguments from ``param['smote']`` and finally reshapes the samples back to the original input layout. When subject identifiers are available we also synthesize a matching subject ID for each synthetic window so stratified cross-subject reports remain meaningful.
+		"""
+
+		smote_param = self.param.get("smote")
+		smote_kwargs = smote_param if isinstance(smote_param, dict) else {}
+
+		original_shape = self.x_train.shape
+		flattened_x = self.x_train.reshape(original_shape[0], -1)
+		labels = np.argmax(self.y_train, axis=1)
+
+		smote = SMOTE(**smote_kwargs)
+		resampled_x, resampled_y = smote.fit_resample(flattened_x, labels)
+
+		if self.sub_train is not None:
+			# For every class we keep the list of observed subject IDs so the synthetic
+			# samples can be attributed to plausible subjects. This avoids leaking
+			# information across subjects in later evaluation steps.
+			class_to_subjects = {cls: self.sub_train[labels == cls] for cls in np.unique(labels)}
+			base_subjects = list(self.sub_train)
+
+			rng_seed = smote_kwargs.get("random_state")
+			if isinstance(rng_seed, np.random.RandomState):
+				rng_seed = rng_seed.randint(0, 2**32 - 1)
+			rng = random.Random(rng_seed) if rng_seed is not None else random
+
+			for label in resampled_y[original_shape[0]:]:
+				candidates = class_to_subjects.get(label)
+				if candidates is None or len(candidates) == 0:
+					candidates = self.sub_train
+				base_subjects.append(rng.choice(list(candidates)))
+
+			self.sub_train = np.asarray(base_subjects, dtype=self.sub_train.dtype)
+
+		self.x_train = resampled_x.reshape((-1,) + original_shape[1:])
+		self.y_train = to_categorical(resampled_y, num_classes=self.num_classes)
 
 	def return_dataset(self):
 		"""Function to retrieve the used dataset of the network.
