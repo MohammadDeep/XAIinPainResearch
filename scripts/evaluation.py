@@ -270,6 +270,130 @@ def rfe_loso(X, aug, hcf, y, subjects, clf, rfes= None, step= 1, output_csv = Pa
 		# save columns to delete
 		to_drop.extend(least_important)
 
+'''
+==============================================================================
+Add code (my):start 
+==============================================================================
+'''
+import numpy as np
+import pandas as pd
+from imblearn.over_sampling import SMOTE
+from imblearn.combine import SMOTETomek, SMOTEENN
+from imblearn.over_sampling import BorderlineSMOTE
+from sklearn.preprocessing import StandardScaler, RobustScaler
+from sklearn.neighbors import NearestNeighbors
+
+def _is_onehot(y: np.ndarray) -> bool:
+    return (y.ndim == 2) and (y.dtype != object) and (y.shape[1] > 1)
+
+def _to_labels(y_onehot: np.ndarray) -> np.ndarray:
+    return np.argmax(y_onehot, axis=1).astype(int)
+
+def _to_onehot(y_labels: np.ndarray, n_classes: int) -> np.ndarray:
+    out = np.zeros((len(y_labels), n_classes), dtype=np.float32)
+    out[np.arange(len(y_labels)), y_labels] = 1.0
+    return out
+
+def augment_hcf_with_smote(
+    hcf_train,              # DataFrame: (N, F)
+    y_train,                # np.ndarray: (N, C) one-hot  یا (N,) لیبل
+    sub_train=None,         # Optional np.ndarray: (N,)
+    scaler="robust",        # "robust" | "standard" | شیء اسکالر سازگار
+    smote_kind="smote",     # "smote" | "smotetomek" | "smoteenn" | "borderline"
+    k_neighbors=5,
+    sampling_strategy="auto",
+    random_state=42
+):
+    """
+    SMOTE فقط روی hcf_train (ویژگی‌های دستی). hcf_test را اصلاً وارد این تابع نکن.
+    خروجی: hcf_train_aug, y_train_aug [, sub_train_aug]
+    """
+    # --- 0) ورودی‌ها به فرم استاندارد
+    if isinstance(hcf_train, pd.DataFrame):
+        X = hcf_train.copy()
+    else:
+        # اگر numpy بود، به DataFrame با نام ستون‌های ساده تبدیل کن
+        X = pd.DataFrame(hcf_train)
+    X = X.replace([np.inf, -np.inf], np.nan).fillna(0.0).astype(float)
+
+    y = np.asarray(y_train)
+    y_is_onehot = _is_onehot(y)
+    if y_is_onehot:
+        n_classes = y.shape[1]
+        y_labels = _to_labels(y)
+    else:
+        y_labels = y.astype(int).ravel()
+        n_classes = int(np.max(y_labels)) + 1
+
+    # --- 1) اسکیل فقط روی TRAIN
+    if scaler == "robust":
+        scaler_obj = RobustScaler()
+    elif scaler == "standard":
+        scaler_obj = StandardScaler()
+    else:
+        scaler_obj = scaler  # شیء اسکالر پاس‌داده‌شده
+    Xs = scaler_obj.fit_transform(X.values)  # فقط train
+
+    # --- 2) انتخاب نوع SMOTE
+    sm = None
+    kind = smote_kind.lower()
+    if kind == "smotetomek":
+        sm = SMOTETomek(
+            smote=SMOTE(k_neighbors=k_neighbors, sampling_strategy=sampling_strategy, random_state=random_state),
+            random_state=random_state
+        )
+    elif kind == "smoteenn":
+        sm = SMOTEENN(
+            smote=SMOTE(k_neighbors=k_neighbors, sampling_strategy=sampling_strategy, random_state=random_state)
+        )
+    elif kind == "borderline":
+        sm = BorderlineSMOTE(k_neighbors=k_neighbors, sampling_strategy=sampling_strategy, random_state=random_state)
+    else:
+        sm = SMOTE(k_neighbors=k_neighbors, sampling_strategy=sampling_strategy, random_state=random_state)
+
+    # --- 3) اجرای SMOTE روی TRAIN
+    Xs_res, y_res = sm.fit_resample(Xs, y_labels)
+
+    # --- 4) برگشت به مقیاس اصلی و DataFrame با همان ستون‌ها
+    X_res = scaler_obj.inverse_transform(Xs_res)
+    cols = list(X.columns)
+    hcf_train_aug = pd.DataFrame(X_res, columns=cols)
+
+    # --- 5) بازسازی y با همان قالب ورودی
+    if y_is_onehot:
+        y_train_aug = _to_onehot(y_res, n_classes)
+    else:
+        y_train_aug = y_res
+
+    # --- 6) اگر sub_train داریم، برای نمونه‌های مصنوعی subject تعیین کنیم
+    if sub_train is not None:
+        sub_train = np.asarray(sub_train)
+        N = len(X)
+        N_aug = len(X_res)
+        if N_aug == N:
+            return hcf_train_aug, y_train_aug, sub_train  # چیزی اضافه نشده
+
+        # نزدیک‌ترین همسایهٔ هر نمونهٔ جدید بین نمونه‌های اصلی (در فضای اسکیل‌شده)
+        nn = NearestNeighbors(n_neighbors=1, metric="euclidean")
+        nn.fit(Xs)  # فقط روی اصلی‌ها
+        Xs_new = Xs_res[N:]
+        idx_src = nn.kneighbors(Xs_new, return_distance=False).ravel()
+        sub_new = sub_train[idx_src]
+        sub_train_aug = np.concatenate([sub_train, sub_new], axis=0)
+        return hcf_train_aug, y_train_aug, sub_train_aug
+
+    return hcf_train_aug, y_train_aug
+
+
+
+'''
+==============================================================================
+Add code (my):end
+==============================================================================
+'''
+
+
+
 def loso_cross_validation(X, aug, hcf, y, subjects, clf, output_csv = Path("results", "loso.csv"), save_model_summary= False, runs = 0):
 	"""Function to validate a keras model using leave one subject out validation.
 
@@ -302,6 +426,32 @@ def loso_cross_validation(X, aug, hcf, y, subjects, clf, output_csv = Path("resu
 
 		# completly delete old classifier and instantiate new one
 		clf = type(clf)(clf.param)
+
+		# افزایش داده های 
+
+		# ← فقط روی hcf_train افزایش داده انجام بده
+		out = augment_hcf_with_smote(
+			hcf_train=hcf_train,
+			y_train=clf.y_train,          # one-hot یا لیبل؛ هرچی هست همان را بده
+			sub_train=sub_train,          # اگر داری
+			scaler="robust",              # یا "standard"
+			smote_kind="smotetomek",      # "smote" / "borderline" / "smoteenn"
+			k_neighbors=5,
+			sampling_strategy="auto",
+			random_state=42
+		)
+
+		# خروجی‌ها را جایگزین «Train» کن؛ Test دست‌نخورده بماند
+		if len(out) == 3:
+			hcf_train_aug, y_train_aug, sub_train_aug = out
+		else:
+			hcf_train_aug, y_train_aug = out
+			sub_train_aug = sub_train
+
+
+
+		
+
 
 		clf.set_dataset(train_data= (x_train, y_train), test_data= (x_test, y_test), aug_data= (aug_train, aug_test),
 						hcf_data= (hcf_train, hcf_test), sub_data= (sub_train, sub_test))
