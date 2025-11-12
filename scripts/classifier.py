@@ -391,6 +391,68 @@ class cnn_rf(cnn, rf_wrapper):
 	def __init__(self, param, name = "cnn_rf"):
 		super(cnn_rf, self).__init__(param, name)
 
+'''
+=======================================================================
+my code (model cnn+lstm) :start
+=======================================================================
+
+'''
+
+from tensorflow.keras import layers, Model
+import tensorflow as tf
+
+class cnn_lstm(classifier):
+    def __init__(self, param, name="cnn_lstm"):
+        super().__init__(param, name)
+
+    def create_model(self):
+        # بهتره از شکل train استفاده شود (معمولاً با test یکی است)
+        input_layer = layers.Input(self.x_train.shape[1:])
+
+        x = layers.LayerNormalization(axis=1)(input_layer) \
+            if self.param.get("norm_layer") else input_layer
+
+        # --- بلوک‌های کانولوشن/پولینگ همانِ شما ---
+        x = layers.Conv2D(128, (7, 1), activation="relu", strides=(2, 1), padding="same")(x)
+        x = layers.MaxPool2D((4, 1))(x); x = layers.Dropout(0.2)(x)
+
+        x = layers.Conv2D(64, (11, 1), activation="relu", strides=(2, 1), padding="same")(x)
+        x = layers.MaxPool2D((4, 1))(x); x = layers.Dropout(0.2)(x)
+
+        x = layers.Conv2D(32, (7, 1), activation="relu", strides=(2, 1), padding="same")(x)
+        x = layers.MaxPool2D((4, 1))(x); x = layers.Dropout(0.2)(x)
+        # شکل اینجا: (B, T', S, C)
+
+        # --- 4D -> 3D برای LSTM: (B, T', S*C) ---
+        x = layers.Lambda(
+            lambda t: tf.reshape(t, (tf.shape(t)[0], tf.shape(t)[1], -1)),
+            name="collapse_space_dims"
+        )(x)
+
+        # اگر پدینگ زمانی دارید، می‌توانید Masking هم بگذارید
+        # x = layers.Masking(mask_value=0.0)(x)
+
+        # --- LSTM (یا BiLSTM) ---
+        x = layers.Bidirectional(
+            layers.LSTM(self.param.get("lstm_units", 128), dropout=0.2, return_sequences=False),
+            name="bilstm"
+        )(x)  # خروجی: (B, 2*lstm_units)
+
+        # سرِ استاندارد: یک لایه ویژگی + Softmax (سازگار با RFE/استخراج ویژگی)
+        x = layers.Dense(self.param.get("dense_out", 100), activation="relu", name="cnn_lstm_features")(x)
+        out = layers.Dense(self.num_classes, activation="softmax", name="pred")(x)
+
+        self.model = Model(inputs=input_layer, outputs=out, name="cnn_lstm")
+
+'''
+=======================================================================
+my code (model cnn+lstm) :end
+=======================================================================
+
+'''
+
+
+
 #-------------------------------------------------------------------------------------------------------
 # Autoencoder wrapper
 #-------------------------------------------------------------------------------------------------------
