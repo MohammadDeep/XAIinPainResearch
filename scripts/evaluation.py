@@ -427,33 +427,38 @@ def loso_cross_validation(X, aug, hcf, y, subjects, clf, output_csv = Path("resu
 		# completly delete old classifier and instantiate new one
 		clf = type(clf)(clf.param)
 
-		# افزایش داده های 
-
-		# ← فقط روی hcf_train افزایش داده انجام بده
-		out = augment_hcf_with_smote(
-			hcf_train=hcf_train,
-			y_train=clf.y_train,          # one-hot یا لیبل؛ هرچی هست همان را بده
-			sub_train=sub_train,          # اگر داری
-			scaler="robust",              # یا "standard"
-			smote_kind="smotetomek",      # "smote" / "borderline" / "smoteenn"
-			k_neighbors=5,
-			sampling_strategy="auto",
-			random_state=42
-		)
-
-		# خروجی‌ها را جایگزین «Train» کن؛ Test دست‌نخورده بماند
-		if len(out) == 3:
-			hcf_train_aug, y_train_aug, sub_train_aug = out
-		else:
-			hcf_train_aug, y_train_aug = out
-			sub_train_aug = sub_train
-
-
-
 		
+		
+		if clf.param['smote'] == True:
+			# افزایش داده های 
+			print('in file evaluation.py :' \
+			'param["smote"] = True' \
+			'use smote for add data ')
+			# ← فقط روی hcf_train افزایش داده انجام بده
+			out = augment_hcf_with_smote(
+				hcf_train=hcf_train,
+				y_train=clf.y_train,          # one-hot یا لیبل؛ هرچی هست همان را بده
+				sub_train=sub_train,          # اگر داری
+				scaler="robust",              # یا "standard"
+				smote_kind="smotetomek",      # "smote" / "borderline" / "smoteenn"
+				k_neighbors=5,
+				sampling_strategy="auto",
+				random_state=42
+			)
+
+			# خروجی‌ها را جایگزین «Train» کن؛ Test دست‌نخورده بماند
+			if len(out) == 3:
+				hcf_train_aug, y_train_aug, sub_train_aug = out
+			else:
+				hcf_train_aug, y_train_aug = out
+				sub_train_aug = sub_train
 
 
-		clf.set_dataset(train_data= (x_train, y_train), test_data= (x_test, y_test), aug_data= (aug_train, aug_test),
+
+			clf.set_dataset(train_data= (x_train, y_train_aug), test_data= (x_test, y_test), aug_data= (aug_train, aug_test),
+						hcf_data= (hcf_train_aug, hcf_test), sub_data= (sub_train_aug, sub_test))
+		else : 
+			clf.set_dataset(train_data= (x_train, y_train), test_data= (x_test, y_test), aug_data= (aug_train, aug_test),
 						hcf_data= (hcf_train, hcf_test), sub_data= (sub_train, sub_test))
 
 		clf.data_processing()
