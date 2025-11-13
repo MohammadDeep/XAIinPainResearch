@@ -476,8 +476,13 @@ def loso_cross_validation(X, aug, hcf, y, subjects, clf, output_csv = Path("resu
 			# calssefier
 			model_name = clf.name
 			classes_list = clf.param.get("classes", [])
-			flat_list = [str(item) for sublist in classes_list for item in sublist]
-			classes_str = "classes_".join(flat_list)
+			
+
+			classes_str = "class_" + "_".join(
+				",".join(str(x) for x in group)      # داخل هر زیرلیست با کاما
+				for group in classes_list            # بین زیرلیست‌ها با _
+			)
+
 			# sensores
 			sensors_list = clf.param.get("selected_sensors", [])
 			sensors_str = "sensors_".join(sensors_list)
