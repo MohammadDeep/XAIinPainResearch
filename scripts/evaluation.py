@@ -418,7 +418,7 @@ def loso_cross_validation(X, aug, hcf, y, subjects, clf, output_csv = Path("resu
 	rfe_features = []
 
 	df_importance = pd.DataFrame([])
-
+	pmote = input('do you like use pmote for data(y/n)?')
 	for subject in (pbar := tqdm(np.unique(subjects))):
 
 		x_train, aug_train, hcf_train, y_train, sub_train, x_test, aug_test, hcf_test, y_test, sub_test= leave_one_subject_out(
@@ -428,7 +428,7 @@ def loso_cross_validation(X, aug, hcf, y, subjects, clf, output_csv = Path("resu
 		clf = type(clf)(clf.param)
 
 		
-		pmote = input('do you like use pmote for data(y/n)?')
+		
 		if  pmote == 'y':
 			# افزایش داده های 
 			print('in file evaluation.py :' \
