@@ -267,7 +267,7 @@ if __name__ == "__main__":
 		for classes in [
 			 [[0],[1], [2],[3], [4]]
 		]:
-			for n_estimators in [50, 200]:
+			for n_estimators in [51, 201]:
 				param["classes"] = classes
 				param["n_estimators"] = n_estimators
 				param["selected_sensors"] = selected_sensors
