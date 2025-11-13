@@ -262,12 +262,31 @@ if __name__ == "__main__":
 
 
 	# HCF
-	for selected_sensors  in [["Eda_RB"]]:
-		# all sensores ['Bvp', 'Evp_E4' , 'Resp', Evp_RB', 'Ecg', 'Emg']
+	for selected_sensors  in [
+		 ['Bvp', 'Eda_E4', 'Resp', 'Eda_RB', 'Ecg', 'Emg'],
+		 ['Bvp'],
+		 ['Eda_E4'],
+		 ['Resp'],
+		 ['Eda_RB'],
+		 ['Ecg'],
+		 ['Emg'],
+		 ['Eda_E4' 'Eda_RB'],
+		 ['Bvp','Ecg'],
+		  				
+						   ]:
+		# all sensores [['Bvp', 'Eda_E4', 'Resp', 'Eda_RB', 'Ecg', 'Emg']
 		for classes in [
-			 [[0],[1], [2],[3], [4]]
+			 [[0,1], [2],[3], [4]],
+			 [[0],[1,2],[3], [4]],
+			 [[0],[1], [2,3], [4]],
+			 [[0],[1], [2],[3,4]],
+			 [[0,1], [2,3], [4]],
+			 [[0,1], [2],[3,4]],
+			 [[0,1,2],[3,4]],
+			 [[0],[1], [2],[3], [4]],
+
 		]:
-			for n_estimators in [51, 201]:
+			for n_estimators in [50, 100 , 150 ,200]:
 				param["classes"] = classes
 				param["n_estimators"] = n_estimators
 				param["selected_sensors"] = selected_sensors

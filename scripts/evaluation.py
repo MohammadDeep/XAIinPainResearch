@@ -430,7 +430,7 @@ def loso_cross_validation(X, aug, hcf, y, subjects, clf, output_csv = Path("resu
 
 		
 		
-		if  pmote == 'y':
+		if  pmote == 'n':
 			# افزایش داده های 
 			print('in file evaluation.py :' \
 			'param["smote"] = True' \
@@ -470,7 +470,7 @@ def loso_cross_validation(X, aug, hcf, y, subjects, clf, output_csv = Path("resu
 		# شروع کد اضافه شده برای ذخیره مدل
 		# ====================================================================
 		print('in file evaluation.py you can change save model or note')
-		save_modeles = False
+		save_modeles = True
 		if save_modeles:
 			# نام مدل (مانند 'cnn' یا 'rf') و شناسه سوژه را می‌گیریم
 			# calssefier
