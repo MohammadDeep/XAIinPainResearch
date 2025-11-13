@@ -232,7 +232,7 @@ if __name__ == "__main__":
 
 	X, y, subjects = None, None, None
 
-	param['smote'] = True
+	
 
 	if param["dataset"] == "biovid":
 		X, y, subjects = read_biovid_np()

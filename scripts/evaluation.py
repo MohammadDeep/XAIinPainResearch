@@ -428,8 +428,8 @@ def loso_cross_validation(X, aug, hcf, y, subjects, clf, output_csv = Path("resu
 		clf = type(clf)(clf.param)
 
 		
-		
-		if clf.param['smote'] == True:
+		pmote = input('do you like use pmote for data(y/n)?')
+		if  pmote == 'y':
 			# افزایش داده های 
 			print('in file evaluation.py :' \
 			'param["smote"] = True' \
