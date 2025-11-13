@@ -232,6 +232,8 @@ if __name__ == "__main__":
 
 	X, y, subjects = None, None, None
 
+	param['smote'] = True
+
 	if param["dataset"] == "biovid":
 		X, y, subjects = read_biovid_np()
 		param["sensor_names"] = biovid_sensors
@@ -262,9 +264,7 @@ if __name__ == "__main__":
 	# HCF
 	for selected_sensors  in [["Eda_RB"]]:
 		for classes in [
-			 [[1], [2]],[[1], [3]],[[1], [4]],
-			[[2], [3]],[[2], [4]],
-			[[3], [4]]
+			 [[1], [2],[3], [4]]
 		]:
 			for n_estimators in [50, 200]:
 				param["classes"] = classes
