@@ -264,7 +264,7 @@ if __name__ == "__main__":
 	# HCF
 	for selected_sensors  in [["Eda_RB"]]:
 		for classes in [
-			 [[1], [2],[3], [4]]
+			 [[0],[1], [2],[3], [4]]
 		]:
 			for n_estimators in [50, 200]:
 				param["classes"] = classes
