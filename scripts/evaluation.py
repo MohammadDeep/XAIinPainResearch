@@ -470,65 +470,67 @@ def loso_cross_validation(X, aug, hcf, y, subjects, clf, output_csv = Path("resu
 		# شروع کد اضافه شده برای ذخیره مدل
 		# ====================================================================
 		print('in file evaluation.py you can change save model or note')
+		save_modeles = False
+		if save_modeles:
+			# نام مدل (مانند 'cnn' یا 'rf') و شناسه سوژه را می‌گیریم
+			# calssefier
+			model_name = clf.name
+			classes_list = clf.param.get("classes", [])
+			flat_list = [str(item) for sublist in classes_list for item in sublist]
+			classes_str = "classes_".join(flat_list)
+			# sensores
+			sensors_list = clf.param.get("selected_sensors", [])
+			sensors_str = "sensors_".join(sensors_list)
+			# n Tree
+			n_estimators = clf.param.get("n_estimators") # دریافت عدد
+
+			# اگر پارامتر وجود داشت، رشته را بساز، در غیر این صورت یک مقدار پیش‌فرض بگذار
+			if n_estimators is not None:
+				n_tree_str = f"n_tree_{n_estimators}" # مثلا: "n_tree_100"
+			else:
+				n_tree_str = "DL_model" # یا هر نام دیگری برای مدل‌های یادگیری عمیق که این پارامتر را ندارند
+
+			# ایجاد مسیر برای ذخیره فایل
+			# ابتدا مطمئن می‌شویم پوشه saved_models وجود دارد
+			save_dir = Path("saved_models", classes_str,sensors_str,n_tree_str )
+			os.makedirs(save_dir, exist_ok=True)
+			# ... (کدهای قبلی برای ساختن save_dir اینجا قرار دارند) ...
+
 		
-		# نام مدل (مانند 'cnn' یا 'rf') و شناسه سوژه را می‌گیریم
-		# calssefier
-		model_name = clf.name
-		classes_list = clf.param.get("classes", [])
-		flat_list = [str(item) for sublist in classes_list for item in sublist]
-		classes_str = "classes_".join(flat_list)
-        # sensores
-		sensors_list = clf.param.get("selected_sensors", [])
-		sensors_str = "sensors_".join(sensors_list)
-		# n Tree
-		n_estimators = clf.param.get("n_estimators") # دریافت عدد
+			# ----- بلوک کد زیر را جایگزین کنید -----
 
-		# اگر پارامتر وجود داشت، رشته را بساز، در غیر این صورت یک مقدار پیش‌فرض بگذار
-		if n_estimators is not None:
-			n_tree_str = f"n_tree_{n_estimators}" # مثلا: "n_tree_100"
+			# تشخیص نوع مدل و ذخیره‌سازی بر اساس آن
+			if model_name == "rf":
+				# این شرط به طور خاص مدل جنگل تصادفی را مدیریت می‌کند
+				save_path = save_dir / f"{model_name}_{runs}_subject_{subject}.joblib"
+				print(f"--- SAVING RF MODEL to: {save_path} ---") # پیغام برای اطمینان از اجرا
+				joblib.dump(clf.model, save_path)
+
+			elif isinstance(clf.model, Model):
+				# این شرط مدل‌های TensorFlow/Keras را مدیریت می‌کند
+				save_path = save_dir / f"{model_name}_{runs}_subject_{subject}.h5"
+				print(f"--- SAVING KERAS MODEL to: {save_path} ---") # پیغام برای اطمینان از اجرا
+				clf.model.save(save_path)
+
+			else:
+				print(f"--- WARNING: Model type '{model_name}' not recognized for saving! ---")
+
+			# -----------------------------------------
+			# تشخیص نوع مدل و ذخیره‌سازی بر اساس آن
+			if isinstance(clf.model, Model):
+				# اگر مدل از نوع TensorFlow/Keras باشد
+				print('save model 1')
+				save_path = save_dir / f"{model_name}_{runs}_subject_{subject}.h5"
+				clf.model.save(save_path)
+				# print(f"Keras model for subject {subject} saved to: {save_path}") # (اختیاری)
+			elif hasattr(clf.model, 'predict_proba'): # یک راه برای تشخیص مدل‌های Scikit-learn
+				# اگر مدل از نوع Scikit-learn باشد (مانند RandomForest)
+				print('save model 2')
+				save_path = save_dir / f"{model_name}_subject_{subject}.joblib"
+				joblib.dump(clf.model, save_path)
+				# print(f"Scikit-learn model for subject {subject} saved to: {save_path}") # (اختیاری)
 		else:
-			n_tree_str = "DL_model" # یا هر نام دیگری برای مدل‌های یادگیری عمیق که این پارامتر را ندارند
-
-		# ایجاد مسیر برای ذخیره فایل
-		# ابتدا مطمئن می‌شویم پوشه saved_models وجود دارد
-		save_dir = Path("saved_models", classes_str,sensors_str,n_tree_str )
-		os.makedirs(save_dir, exist_ok=True)
-		# ... (کدهای قبلی برای ساختن save_dir اینجا قرار دارند) ...
-
-	
-		# ----- بلوک کد زیر را جایگزین کنید -----
-
-		# تشخیص نوع مدل و ذخیره‌سازی بر اساس آن
-		if model_name == "rf":
-			# این شرط به طور خاص مدل جنگل تصادفی را مدیریت می‌کند
-			save_path = save_dir / f"{model_name}_{runs}_subject_{subject}.joblib"
-			print(f"--- SAVING RF MODEL to: {save_path} ---") # پیغام برای اطمینان از اجرا
-			joblib.dump(clf.model, save_path)
-
-		elif isinstance(clf.model, Model):
-			# این شرط مدل‌های TensorFlow/Keras را مدیریت می‌کند
-			save_path = save_dir / f"{model_name}_{runs}_subject_{subject}.h5"
-			print(f"--- SAVING KERAS MODEL to: {save_path} ---") # پیغام برای اطمینان از اجرا
-			clf.model.save(save_path)
-
-		else:
-			print(f"--- WARNING: Model type '{model_name}' not recognized for saving! ---")
-
-		# -----------------------------------------
-		# تشخیص نوع مدل و ذخیره‌سازی بر اساس آن
-		if isinstance(clf.model, Model):
-			# اگر مدل از نوع TensorFlow/Keras باشد
-			print('save model 1')
-			save_path = save_dir / f"{model_name}_{runs}_subject_{subject}.h5"
-			clf.model.save(save_path)
-			# print(f"Keras model for subject {subject} saved to: {save_path}") # (اختیاری)
-		elif hasattr(clf.model, 'predict_proba'): # یک راه برای تشخیص مدل‌های Scikit-learn
-			# اگر مدل از نوع Scikit-learn باشد (مانند RandomForest)
-			print('save model 2')
-			save_path = save_dir / f"{model_name}_subject_{subject}.joblib"
-			joblib.dump(clf.model, save_path)
-			# print(f"Scikit-learn model for subject {subject} saved to: {save_path}") # (اختیاری)
-			
+			print('modeles dont save.')		
 		# ====================================================================
 		# پایان کد اضافه شده
 		# ====================================================================

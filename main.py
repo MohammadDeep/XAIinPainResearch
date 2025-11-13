@@ -263,6 +263,7 @@ if __name__ == "__main__":
 
 	# HCF
 	for selected_sensors  in [["Eda_RB"]]:
+		# all sensores ['Bvp', 'Evp_E4' , 'Resp', Evp_RB', 'Ecg', 'Emg']
 		for classes in [
 			 [[0],[1], [2],[3], [4]]
 		]:
