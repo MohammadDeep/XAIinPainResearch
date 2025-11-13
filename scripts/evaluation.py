@@ -438,7 +438,7 @@ def loso_cross_validation(X, aug, hcf, y, subjects, clf, output_csv = Path("resu
 			# ← فقط روی hcf_train افزایش داده انجام بده
 			out = augment_hcf_with_smote(
 				hcf_train=hcf_train,
-				y_train=clf.y_train,          # one-hot یا لیبل؛ هرچی هست همان را بده
+				y_train=y_train,          # one-hot یا لیبل؛ هرچی هست همان را بده
 				sub_train=sub_train,          # اگر داری
 				scaler="robust",              # یا "standard"
 				smote_kind="smotetomek",      # "smote" / "borderline" / "smoteenn"
