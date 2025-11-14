@@ -17,7 +17,7 @@ from tensorflow.keras.optimizers import Adam
 from sklearn.ensemble import RandomForestRegressor
 
 from .data_handling import unison_shuffled
-from .augmentation import window_slice, window_warp
+from ..datasets.augmentation import window_slice, window_warp
 
 verbose= 0
 

@@ -11,7 +11,7 @@ import pandas as pd
 import tensorflow as tf
 from pathlib import Path
 from scipy.stats import zscore
-from scripts.augmentation import augment
+from datasets.augmentation import augment
 
 from hcf import get_hcf, moving_average
 from scripts.classifier import *
