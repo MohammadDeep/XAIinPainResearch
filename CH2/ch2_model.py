@@ -117,8 +117,7 @@ for s in unique_subjects:
     print(f"Fit time: {(t1 - t0):.1f} seconds")
    
 
-    # ذخیره‌ی کل آبجکت مدل روی دیسک
-    joblib.dump(hc2, f"./CH2/hc2_{s}_covas.joblib")
+
     # یا اگر مسیر خاصی می‌خواهی:
     # joblib.dump(hc2, "./models/hc2_covas.joblib")
 
@@ -128,7 +127,15 @@ for s in unique_subjects:
 
     all_preds.append(y_pred)
     all_trues.append(y_test)
+    all_preds = np.concatenate(y_pred)
+    all_trues = np.concatenate(y_test)
 
+    loso_acc = accuracy_score(all_trues, all_preds)
+    print("\n=============================")
+    print(" Accuracy:", loso_acc)
+    print("=============================")
+    # ذخیره‌ی کل آبجکت مدل روی دیسک
+    joblib.dump(hc2, f"./CH2/hc2_{s}_accuracy{loso_acc}_covas.joblib")
 # اگر همه foldها اسکپ نشده باشند
 if len(all_preds) > 0:
     all_preds = np.concatenate(all_preds)
