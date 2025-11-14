@@ -37,9 +37,6 @@ for i in [y_covas,y_heater ]:
     # برای covas (5 کلاس)
     y_covas_labels = np.argmax(y, axis=1).astype(int)   # شکل: (2495,)
 
-    # برای heater (6 کلاس)
-    y_heater_labels = np.argmax(y_heater, axis=1).astype(int) # شکل: (2495,)
-
     print("y_covas_labels:", y_covas_labels.shape, np.unique(y_covas_labels))
     
 
