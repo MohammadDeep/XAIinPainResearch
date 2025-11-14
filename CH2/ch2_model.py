@@ -90,7 +90,8 @@ print("Train size:", X_train.shape[0], " Test size:", X_test.shape[0])
 hc2 = HIVECOTEV2(
     time_limit_in_minutes=10,   # hc2 سنگین است؛ برای تست می‌تونی کم/زیادش کنی
     n_jobs=-1,                  # استفاده از همه هسته‌های CPU
-    random_state=0
+    random_state=0,
+    verbose=1
 )
 
 print("Fitting HC2 on random split...")
@@ -129,7 +130,8 @@ for s in unique_subjects:
     hc2 = HIVECOTEV2(
         time_limit_in_minutes=10,
         n_jobs=-1,
-        random_state=0
+        random_state=0,
+        verbose=1
     )
 
     print("  Fitting HC2...")
