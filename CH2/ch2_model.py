@@ -64,9 +64,8 @@ subjects_ch2 = read_File(path + subjects_file)
 # اینجا انتخاب می‌کنی hc2 را روی کدام لیبل اجرا کنی:
 #   y_target = y_covas_ch2   # ۵ کلاسه (مثلا covas)
 #   y_target = y_heater_ch2  # ۶ کلاسه (heater)
-y_target = y_covas_ch2[:10 ]
-X_ch2 = X_ch2[:10]
-subjects_ch2 = subjects_ch2[:10]
+y_target = y_covas_ch2
+
 
 
 # چک سازگاری تعداد نمونه‌ها
@@ -77,38 +76,6 @@ print("X_ch2:", X_ch2.shape)
 print("y_target:", y_target.shape)
 print("subjects_ch2:", subjects_ch2.shape)
 
-# ===================== ۲. train/test split ساده =====================
-print("\n================ RANDOM SPLIT EXPERIMENT ================")
-
-X_train, X_test, y_train, y_test = train_test_split(
-    X_ch2,
-    y_target,
-    test_size=0.2,
-    stratify=y_target,
-    random_state=42
-)
-
-print("Train size:", X_train.shape[0], " Test size:", X_test.shape[0])
-
-hc2 = HIVECOTEV2(
-    time_limit_in_minutes=10,   # hc2 سنگین است؛ برای تست می‌تونی کم/زیادش کنی
-    n_jobs=-1,                  # استفاده از همه هسته‌های CPU
-    random_state=0,
-    verbose=1
-)
-
-print("Fitting HC2 on random split...")
-t0 = time.time()
-hc2.fit(X_train, y_train)
-t1 = time.time()
-print(f"Fit time: {(t1 - t0):.1f} seconds")
-
-
-print("Predicting...")
-y_pred = hc2.predict(X_test)
-
-acc = accuracy_score(y_test, y_pred)
-print("Random split accuracy:", acc)
 
 # ===================== ۳. LOSO بر اساس subjects =====================
 print("\n================ LOSO EXPERIMENT (by subject) ================")
