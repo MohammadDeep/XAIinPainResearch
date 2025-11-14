@@ -88,54 +88,48 @@ all_preds = []
 all_trues = []
 
 for s in unique_subjects:
-    print(f"\n=== LOSO fold: subject = {s} ===")
-    test_mask = (subjects_ch2 == s)
-    train_mask = ~test_mask
+    if s != 0:
+        print(f"\n=== LOSO fold: subject = {s} ===")
+        test_mask = (subjects_ch2 == s)
+        train_mask = ~test_mask
 
-    X_train, X_test = X_ch2[train_mask], X_ch2[test_mask]
-    y_train, y_test = y_target[train_mask], y_target[test_mask]
+        X_train, X_test = X_ch2[train_mask], X_ch2[test_mask]
+        y_train, y_test = y_target[train_mask], y_target[test_mask]
 
-    print("  Train size:", X_train.shape[0], " Test size:", X_test.shape[0])
+        print("  Train size:", X_train.shape[0], " Test size:", X_test.shape[0])
 
-    # اگر تو train فقط یک کلاس باشد، بعضی مدل‌ها مشکل پیدا می‌کنند
-    if len(np.unique(y_train)) < 2:
-        print("  [WARN] Train fold has only one class; skipping this subject.")
-        continue
+        # اگر تو train فقط یک کلاس باشد، بعضی مدل‌ها مشکل پیدا می‌کنند
+        if len(np.unique(y_train)) < 2:
+            print("  [WARN] Train fold has only one class; skipping this subject.")
+            continue
 
-    hc2 = HIVECOTEV2(
-        time_limit_in_minutes=10,
-        n_jobs=-1,
-        random_state=0,
-        verbose=1
-    )
+        hc2 = HIVECOTEV2(
+            time_limit_in_minutes=10,
+            n_jobs=-1,
+            random_state=0,
+            verbose=1
+        )
 
-    print("  Fitting HC2...")
+        print("  Fitting HC2...")
+        
+        t0 = time.time()
+        hc2.fit(X_train, y_train)
+        t1 = time.time()
+        print(f"Fit time: {(t1 - t0):.1f} seconds")
     
-    t0 = time.time()
-    hc2.fit(X_train, y_train)
-    t1 = time.time()
-    print(f"Fit time: {(t1 - t0):.1f} seconds")
-   
 
 
-    # یا اگر مسیر خاصی می‌خواهی:
-    # joblib.dump(hc2, "./models/hc2_covas.joblib")
+        # یا اگر مسیر خاصی می‌خواهی:
+        # joblib.dump(hc2, "./models/hc2_covas.joblib")
 
 
-    print("  Predicting for this subject...")
-    y_pred = hc2.predict(X_test)
+        print("  Predicting for this subject...")
+        y_pred = hc2.predict(X_test)
 
-    all_preds.append(y_pred)
-    all_trues.append(y_test)
-    all_preds = np.concatenate(y_pred)
-    all_trues = np.concatenate(y_test)
-
-    loso_acc = accuracy_score(all_trues, all_preds)
-    print("\n=============================")
-    print(" Accuracy:", loso_acc)
-    print("=============================")
-    # ذخیره‌ی کل آبجکت مدل روی دیسک
-    joblib.dump(hc2, f"./CH2/hc2_{s}_accuracy{loso_acc}_covas.joblib")
+        all_preds.append(y_pred)
+        all_trues.append(y_test)
+        
+        joblib.dump(hc2, f"./CH2/hc2_{s}_covas.joblib")
 # اگر همه foldها اسکپ نشده باشند
 if len(all_preds) > 0:
     all_preds = np.concatenate(all_preds)
