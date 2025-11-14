@@ -64,8 +64,9 @@ subjects_ch2 = read_File(path + subjects_file)
 # اینجا انتخاب می‌کنی hc2 را روی کدام لیبل اجرا کنی:
 #   y_target = y_covas_ch2   # ۵ کلاسه (مثلا covas)
 #   y_target = y_heater_ch2  # ۶ کلاسه (heater)
-y_target = y_covas_ch2
-
+y_target = y_covas_ch2[:10 , : , :]
+X_ch2 = X_ch2[:10]
+subjects_ch2 = subjects_ch2[:10]
 # چک سازگاری تعداد نمونه‌ها
 assert X_ch2.shape[0] == y_target.shape[0] == subjects_ch2.shape[0], "N mismatch!"
 
