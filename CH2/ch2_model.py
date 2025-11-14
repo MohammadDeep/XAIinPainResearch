@@ -3,6 +3,7 @@ from aeon.classification.hybrid import HIVECOTEV2
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 import time
+import joblib
 # مسیر فایل npy
 path = './datasets/painmonit/np-dataset/'
 x_file = 'X.npy'
@@ -114,7 +115,13 @@ for s in unique_subjects:
     hc2.fit(X_train, y_train)
     t1 = time.time()
     print(f"Fit time: {(t1 - t0):.1f} seconds")
-    
+   
+
+    # ذخیره‌ی کل آبجکت مدل روی دیسک
+    joblib.dump(hc2, f"./CH2/hc2_{s}_covas.joblib")
+    # یا اگر مسیر خاصی می‌خواهی:
+    # joblib.dump(hc2, "./models/hc2_covas.joblib")
+
 
     print("  Predicting for this subject...")
     y_pred = hc2.predict(X_test)
