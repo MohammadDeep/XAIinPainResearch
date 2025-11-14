@@ -621,7 +621,7 @@ def save_data(clf, output_csv, start_date, start_time, all_fscores, all_accs, df
 			with open(model_summary_path, 'w') as f:
 				clf.model.summary(print_fn=lambda x: f.write(x + '\n'))
 
-def five_loso(X, aug, hcf, y, subjects, clf, runs= 5, output_csv = Path("results", "5_loso.csv")):
+def five_loso(X, aug, hcf, y, subjects, clf, runs= 1, output_csv = Path("results", "5_loso.csv")):
 	"""Function to validate a keras model using a leave one subject out validation 5 times and computing the mean.
 
 	Args:
