@@ -13,10 +13,18 @@ def read_File(path):
     print("type:", type(arr))
     print("shape:", arr.shape)
     print("dtype:", arr.dtype)
+    return arr
 
-for i in [x, subjects, y_covas, y_heater]:
+for i in [x]:
     print('==================================')
     print( i )
-    read_File(path + i)
+    X_raw = read_File(path + i)
+
+    print('----------------------------')
+    print('creating data for ch2:')
+    # 2) حذف بعد اضافه‌ی آخر
+    X_no_last = np.squeeze(X_raw, axis=-1)
+    X = np.transpose(X_no_last, (0, 2, 1)) 
+    print("X shape for HC2:", X.shape)
 
 
