@@ -15,8 +15,8 @@ n_jobs = -1
 '''
 debug_mode = True
 max_subjects_debug = 3          # حداکثر چند سوژه برای تست
-max_train_samples_debug = 200   # حداکثر چند نمونه train برای هر سوژه
-max_test_samples_debug = 50     # حداکثر چند نمونه test برای هر سوژه
+max_train_samples_debug = 20   # حداکثر چند نمونه train برای هر سوژه
+max_test_samples_debug = 5     # حداکثر چند نمونه test برای هر سوژه
 
 rng = np.random.default_rng(0)   # برای انتخاب تصادفی تکرارپذیر
 
