@@ -10,6 +10,15 @@ import pandas as pd
 time_limit_in_minutes = 1
 n_jobs = -1
 
+'''
+اضافه شده برای تست کد
+'''
+debug_mode = True
+max_subjects_debug = 3          # حداکثر چند سوژه برای تست
+max_train_samples_debug = 200   # حداکثر چند نمونه train برای هر سوژه
+max_test_samples_debug = 50     # حداکثر چند نمونه test برای هر سوژه
+
+rng = np.random.default_rng(0)   # برای انتخاب تصادفی تکرارپذیر
 
 
 # مسیر فایل npy
@@ -47,6 +56,10 @@ X_no_last = np.squeeze(X_raw, axis=-1)
 # transpose به فرم (N, C, T) که hc2 می‌خواهد
 X_ch2 = np.transpose(X_no_last, (0, 2, 1))
 print("X_ch2 shape for HC2:", X_ch2.shape)
+# در حالت دیباگ، طول زمانی سیگنال را نصف کن (هر 2 نمونه یکی)
+if debug_mode:
+    X_ch2 = X_ch2[:, :, ::2]
+    print("DEBUG: X_ch2 shape after temporal downsample:", X_ch2.shape)
 
 # (اختیاری) تبدیل به float32 برای مصرف رم کمتر
 X_ch2 = X_ch2.astype(np.float32)
@@ -100,6 +113,10 @@ print("\n================ LOSO EXPERIMENT (by subject) ================")
 
 unique_subjects = np.unique(subjects_ch2)
 print("Unique subjects:", unique_subjects)
+# در حالت دیباگ، فقط چند سوژه اول را استفاده کن
+if debug_mode:
+    unique_subjects = unique_subjects[:max_subjects_debug]
+    print("DEBUG: using only subjects:", unique_subjects)
 
 
 # اگر پوشه وجود نداشت، ساخته می‌شود. اگر وجود داشته باشد، کاری نمی‌کند.
@@ -142,6 +159,22 @@ for s in unique_subjects:
 
         n_train = X_train.shape[0]
         n_test = X_test.shape[0]
+            # در حالت دیباگ، تعداد نمونه‌های train و test را محدود کن
+        if debug_mode:
+            if n_train > max_train_samples_debug:
+                idx_tr = rng.choice(n_train, size=max_train_samples_debug, replace=False)
+                X_train = X_train[idx_tr]
+                y_train = y_train[idx_tr]
+                n_train = X_train.shape[0]
+
+            if n_test > max_test_samples_debug:
+                idx_te = rng.choice(n_test, size=max_test_samples_debug, replace=False)
+                X_test = X_test[idx_te]
+                y_test = y_test[idx_te]
+                n_test = X_test.shape[0]
+
+            print(f"  DEBUG: reduced Train size: {n_train}, Test size: {n_test}")
+
         print("  Train size:", n_train, " Test size:", n_test)
 
 
