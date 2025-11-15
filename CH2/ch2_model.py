@@ -7,19 +7,20 @@ import os
 import pandas as pd
 
 # parametr for model ch2 
-time_limit_in_minutes = 1
+time_limit_in_minutes = 0
 n_jobs = -1
 
 '''
-اضافه شده برای تست کد
+for test code
 '''
-debug_mode = True
+debug_mode = False
 max_subjects_debug = 3          # حداکثر چند سوژه برای تست
 max_train_samples_debug = 20   # حداکثر چند نمونه train برای هر سوژه
 max_test_samples_debug = 5     # حداکثر چند نمونه test برای هر سوژه
 
 rng = np.random.default_rng(0)   # برای انتخاب تصادفی تکرارپذیر
-
+if debug_mode:
+   time_limit_in_minutes = 1 
 
 # مسیر فایل npy
 save_modeles_path = "./CH2/modeles"
