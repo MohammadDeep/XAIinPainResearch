@@ -22,7 +22,7 @@ SUBJECTS_FILE = "subjects.npy"
 Y_COVAS_FILE = "y_covas.npy"
 Y_HEATER_FILE = "y_heater.npy"
 
-MODELS_DIR = "./CH2"  # جایی که مدل‌ها را با نام hc2_{s}_covas.joblib ذخیره کرده‌ای
+MODELS_DIR =  "./CH2/modeles" # جایی که مدل‌ها را با نام hc2_{s}_covas.joblib ذخیره کرده‌ای
 CSV_OUTPUT_PATH = folder_path +"/hc2_covas_loso_results.csv"
 
 
@@ -120,7 +120,15 @@ total_n_all = 0             # مجموع تعداد نمونه‌های تست �
 unique_subjects = np.unique(subjects_ch2)
 print("Unique subjects in data:", unique_subjects)
 
-for s in unique_subjects:
+n_modeles = sum(
+    1 for name in os.listdir(MODELS_DIR)
+    if os.path.isfile(os.path.join(MODELS_DIR, name))
+)
+
+print("Number of files:", n_modeles)
+
+ 
+for s in range(n_modeles):
     print(f"\n=== Evaluating saved HC2 model for subject = {s} ===")
 
     # مسیر فایل مدل ذخیره‌شده برای این سوژه

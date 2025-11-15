@@ -4,7 +4,9 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 import time
 import joblib
+import os
 # مسیر فایل npy
+
 path = './datasets/painmonit/np-dataset/'
 x_file = 'X.npy'
 subjects_file = 'subjects.npy'
@@ -87,6 +89,11 @@ print("Unique subjects:", unique_subjects)
 all_preds = []
 all_trues = []
 
+save_modeles_path = "./CH2/modeles"
+
+# اگر پوشه وجود نداشت، ساخته می‌شود. اگر وجود داشته باشد، کاری نمی‌کند.
+os.makedirs(save_modeles_path, exist_ok=True)
+
 for s in unique_subjects:
     if s != 0:
         print(f"\n=== LOSO fold: subject = {s} ===")
@@ -128,8 +135,9 @@ for s in unique_subjects:
 
         all_preds.append(y_pred)
         all_trues.append(y_test)
-        
-        joblib.dump(hc2, f"./CH2/hc2_{s}_covas.joblib")
+
+
+        joblib.dump(hc2, save_modeles_path + f"/hc2_{s}_covas.joblib")
 # اگر همه foldها اسکپ نشده باشند
 if len(all_preds) > 0:
     all_preds = np.concatenate(all_preds)
