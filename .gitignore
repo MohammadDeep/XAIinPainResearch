@@ -128,3 +128,5 @@ models/
 
 # dataset
 /datasets
+
+test*

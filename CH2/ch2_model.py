@@ -1,17 +1,32 @@
 import numpy as np
 from aeon.classification.hybrid import HIVECOTEV2
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, f1_score
 import time
 import joblib
 import os
+import pandas as pd
+
+# parametr for model ch2 
+time_limit_in_minutes = 1
+n_jobs = -1
+
+
+
 # مسیر فایل npy
+save_modeles_path = "./CH2/modeles"
+
+results_dir = "./CH2/result"
+
+# اگر پوشه وجود نداشت، ساخته می‌شود. اگر وجود داشته باشد، کاری نمی‌کند.
+os.makedirs(results_dir, exist_ok=True)
+results_csv = os.path.join(results_dir, "ch2_result.csv")
 
 path = './datasets/painmonit/np-dataset/'
 x_file = 'X.npy'
 subjects_file = 'subjects.npy'
 y_covas_file = 'y_covas.npy'
 y_heater_file = 'y_heater.npy'
+
 
 def read_File(path):
     arr = np.load(path)
@@ -86,24 +101,49 @@ print("\n================ LOSO EXPERIMENT (by subject) ================")
 unique_subjects = np.unique(subjects_ch2)
 print("Unique subjects:", unique_subjects)
 
-all_preds = []
-all_trues = []
-
-save_modeles_path = "./CH2/modeles"
 
 # اگر پوشه وجود نداشت، ساخته می‌شود. اگر وجود داشته باشد، کاری نمی‌کند.
 os.makedirs(save_modeles_path, exist_ok=True)
 
 for s in unique_subjects:
-    if s != 0:
-        print(f"\n=== LOSO fold: subject = {s} ===")
+    print(f"\n=== LOSO fold: subject = {s} ===")
+    model_path = os.path.join(save_modeles_path, f"hc2_subjects_{s}_covas_time_limit_in_minutes_{time_limit_in_minutes}.joblib")
+    if os.path.isfile(model_path): 
+        print('This model already exists and does not need to be trained. ') 
+                # فقط اگر فایل CSV وجود دارد، بخوان
+        if os.path.isfile(results_csv):
+            df = pd.read_csv(results_csv)
+
+            # پیدا کردن سطری که model_path برابر این مسیر است
+            row = df[df["model_path"] == model_path]
+
+            # اگر سطر پیدا شد
+            if not row.empty:
+                print("Row found:")
+                print(row)
+
+                # اگر فقط اولین سطر را می‌خواهی به صورت دیکشنری
+                info = row.iloc[0].to_dict()
+                print("\nAs dict:")
+                for k, v in info.items():
+                    print(f"{k}: {v}")
+            else:
+                print("No row found for this model_path in CSV.")
+        else:
+            print("Results CSV does not exist yet.")
+        # در این حالت، تست دوباره انجام نمی‌دهی و سطر جدید هم ثبت نمی‌کنی
+    else:  
+        print('State training')
         test_mask = (subjects_ch2 == s)
         train_mask = ~test_mask
 
         X_train, X_test = X_ch2[train_mask], X_ch2[test_mask]
         y_train, y_test = y_target[train_mask], y_target[test_mask]
 
-        print("  Train size:", X_train.shape[0], " Test size:", X_test.shape[0])
+        n_train = X_train.shape[0]
+        n_test = X_test.shape[0]
+        print("  Train size:", n_train, " Test size:", n_test)
+
 
         # اگر تو train فقط یک کلاس باشد، بعضی مدل‌ها مشکل پیدا می‌کنند
         if len(np.unique(y_train)) < 2:
@@ -111,8 +151,14 @@ for s in unique_subjects:
             continue
 
         hc2 = HIVECOTEV2(
-            time_limit_in_minutes=10,
-            n_jobs=-1,
+            time_limit_in_minutes= time_limit_in_minutes,
+            # اجازه بده STC، DrCIF، Arsenal و TDE از تنظیمات کامل پیش‌فرض خودشان استفاده کنند
+            stc_params=None,
+            drcif_params=None,
+            arsenal_params=None,
+            tde_params=None,
+
+            n_jobs= n_jobs,
             random_state=0,
             verbose=1
         )
@@ -122,7 +168,8 @@ for s in unique_subjects:
         t0 = time.time()
         hc2.fit(X_train, y_train)
         t1 = time.time()
-        print(f"Fit time: {(t1 - t0):.1f} seconds")
+        fit_time_sec = t1 - t0
+        print(f"Fit time: {(fit_time_sec):.1f} seconds")
     
 
 
@@ -131,21 +178,46 @@ for s in unique_subjects:
 
 
         print("  Predicting for this subject...")
-        y_pred = hc2.predict(X_test)
+        t2 = time.time()
+        y_proba = hc2.predict_proba(X_test)
+        y_pred = np.argmax(y_proba, axis=1)
+        t3 = time.time()
+        eval_time_total_sec = t3 - t2
+        eval_time_per_sample_sec = eval_time_total_sec / n_test
 
-        all_preds.append(y_pred)
-        all_trues.append(y_test)
 
+        # دقت برای این سوژه
+        acc_s = accuracy_score(y_test, y_pred)
+        # F1 macro: میانگین F1 روی همه کلاس‌ها با وزن برابر
+        f1_macro_s = f1_score(y_test, y_pred, average="macro")
 
-        joblib.dump(hc2, save_modeles_path + f"/hc2_{s}_covas.joblib")
-# اگر همه foldها اسکپ نشده باشند
-if len(all_preds) > 0:
-    all_preds = np.concatenate(all_preds)
-    all_trues = np.concatenate(all_trues)
+        print(f"  Subject {s} accuracy: {acc_s:.4f}")
+        print(f"  Subject {s} F1 macro      : {f1_macro_s:.4f}")
+        print(f"  Eval time total (sec): {eval_time_total_sec:.4f}")
+        print(f"  Eval time per sample (sec): {eval_time_per_sample_sec:.6f}")
 
-    loso_acc = accuracy_score(all_trues, all_preds)
-    print("\n=============================")
-    print("Overall LOSO Accuracy:", loso_acc)
-    print("=============================")
-else:
-    print("No valid LOSO folds (check label distribution per subject).")
+        # ذخیره مدل این سوژه
+        joblib.dump(hc2, model_path)
+
+        # اضافه کردن یک سطر به نتایج
+        row_dict = {
+            "subject_id": int(s),
+            "train_size": n_train,
+            "test_size": n_test,
+            "accuracy": acc_s,
+            "f1_macro": f1_macro_s,
+            "fit_time_sec": fit_time_sec,
+            "eval_time_total_sec": eval_time_total_sec,
+            "eval_time_per_sample_sec": eval_time_per_sample_sec,
+            "model_path": model_path,
+            "time_limit_in_minutes" : time_limit_in_minutes,
+            "n_jobs": n_jobs,
+            "y_test|y_proba" :  list(zip(y_test, y_proba))
+        }
+                # تبدیل به DataFrame تک‌سطره
+        df_row = pd.DataFrame([row_dict])
+
+        # اگر فایل وجود نداشت → با header؛ اگر وجود داشت → فقط append بدون header
+        file_exists = os.path.exists(results_csv)
+        df_row.to_csv(results_csv, mode="a", header=not file_exists, index=False)
+        print(f"  Appended results row to: {results_csv}")

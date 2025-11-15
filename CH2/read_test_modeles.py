@@ -22,8 +22,8 @@ SUBJECTS_FILE = "subjects.npy"
 Y_COVAS_FILE = "y_covas.npy"
 Y_HEATER_FILE = "y_heater.npy"
 
-MODELS_DIR =  "./CH2/modeles" # جایی که مدل‌ها را با نام hc2_{s}_covas.joblib ذخیره کرده‌ای
-CSV_OUTPUT_PATH = folder_path +"/hc2_covas_loso_results.csv"
+MODELS_DIR =  "./CH2/modeles_time_limit_in_minutes_0" # جایی که مدل‌ها را با نام hc2_{s}_covas.joblib ذخیره کرده‌ای
+CSV_OUTPUT_PATH = folder_path +"/hc2_covas_loso_results_time_limit_in_minutes_0.csv"
 
 
 def read_file(file_path: str) -> np.ndarray:
