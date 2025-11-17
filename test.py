@@ -44,54 +44,54 @@ def read_File(path_):
     return arr
 
 
-def print_class_stats(label_name, y_labels, subjects):
+def make_class_counts_df(y_labels, subjects, label_name=None):
     """
-    چاپ آمار تعداد نمونه‌ها برای هر کلاس:
-      - به صورت کلی (global)
-      - برای هر subject به تفکیک کلاس‌ها
-
-    label_name: فقط برای چاپ (مثلا "COVAS" یا "HEATER")
-    y_labels:  آرایه لیبل‌های عددی (N,) با مقادیر 0..K-1
-    subjects:  آرایه شناسه سوژه‌ها با شکل (N,)
+    ساخت یک DataFrame که:
+      - سطرها: subject ها + یک سطر TOTAL
+      - ستون‌ها: class_0, class_1, ... (کلاس‌ها)
     """
-    # چک سازگاری طول‌ها
     assert y_labels.shape[0] == subjects.shape[0], \
         "Length mismatch between labels and subjects!"
 
-    # تعیین تعداد کلاس‌ها از روی بیشترین لیبل
+    # تعداد کلاس‌ها
     n_classes = int(y_labels.max()) + 1
 
-    print(f"\n========== STATS FOR {label_name} ==========")
-
-    # -------- آمار کلی (global) --------
-    print("Global class counts:")
-    global_counts = np.bincount(y_labels, minlength=n_classes)
-    for cls in range(n_classes):
-        print(f"  Class {cls}: {global_counts[cls]} samples")
-
-    # -------- آمار به تفکیک subject --------
-    print("\nPer-subject class counts:")
+    # سوژه‌های یکتا
     unique_subjects = np.unique(subjects)
 
-    # اگر حالت دیباگ روشن است، تعداد سوژه‌ها را محدود کن
+    # در حالت دیباگ، فقط چند سوژه اول
     if debug_mode:
         unique_subjects = unique_subjects[:max_subjects_debug]
-        print(f"DEBUG: using only subjects: {unique_subjects}")
+        print(f"DEBUG ({label_name}): using only subjects: {unique_subjects}")
 
+    rows = []
+
+    # آمار برای هر سوژه
     for subj in unique_subjects:
         mask = (subjects == subj)
         y_sub = y_labels[mask]
+        counts = np.bincount(y_sub, minlength=n_classes)
 
-        if y_sub.size == 0:
-            print(f"Subject {subj}: no samples")
-            continue
-
-        counts_sub = np.bincount(y_sub, minlength=n_classes)
-
-        print(f"\nSubject {subj}: total {mask.sum()} samples")
+        row = {"subject": subj}
         for cls in range(n_classes):
-            print(f"  Class {cls}: {counts_sub[cls]} samples")
-    print("=" * 60)
+            row[f"class_{cls}"] = counts[cls]
+        rows.append(row)
+
+    # سطر جمع (TOTAL) – فقط روی همین سوژه‌های انتخاب‌شده
+    mask_all = np.isin(subjects, unique_subjects)
+    y_used = y_labels[mask_all]
+    total_counts = np.bincount(y_used, minlength=n_classes)
+
+    total_row = {"subject": "TOTAL"}
+    for cls in range(n_classes):
+        total_row[f"class_{cls}"] = total_counts[cls]
+    rows.append(total_row)
+
+    df = pd.DataFrame(rows)
+    # ترتیب ستون‌ها: subject اول، بعد کلاس‌ها
+    cols = ["subject"] + [f"class_{cls}" for cls in range(n_classes)]
+    df = df[cols]
+    return df
 
 
 # ===================== X =====================
@@ -144,9 +144,17 @@ print('==================================')
 print(subjects_file)
 subjects_ch2 = read_File(os.path.join(path, subjects_file))
 
-# ===================== آمار کلاس‌ها برای هر دو نوع لیبل =====================
-print_class_stats("COVAS",  y_covas_ch2,  subjects_ch2)
-print_class_stats("HEATER", y_heater_ch2, subjects_ch2)
+# ===================== ساخت و ذخیره‌ی CSV برای COVAS =====================
+df_covas = make_class_counts_df(y_covas_ch2, subjects_ch2, label_name="COVAS")
+covas_csv_path = os.path.join(results_dir, "covas_class_counts_per_subject.csv")
+df_covas.to_csv(covas_csv_path, index=False, encoding="utf-8-sig")
+print(f"\nSaved COVAS class counts to: {covas_csv_path}")
+
+# ===================== ساخت و ذخیره‌ی CSV برای HEATER =====================
+df_heater = make_class_counts_df(y_heater_ch2, subjects_ch2, label_name="HEATER")
+heater_csv_path = os.path.join(results_dir, "heater_class_counts_per_subject.csv")
+df_heater.to_csv(heater_csv_path, index=False, encoding="utf-8-sig")
+print(f"Saved HEATER class counts to: {heater_csv_path}")
 
 # ===================== انتخاب مسئله: covas یا heater برای HC2 =====================
 # اینجا انتخاب می‌کنی hc2 را روی کدام لیبل اجرا کنی:
